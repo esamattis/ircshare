@@ -33,10 +33,11 @@ app.post "/upload", (req, res) ->
   req.form.complete (err, fields, files) ->
     if err then throw err
 
+    for k, v of fields
+      fields[k] = qs.unescape v
 
-    fields.caption = qs.unescape fields.caption
     fields.url = "http://#{ req.headers.host }/img/#{ path.basename files.picdata.path }"
-    fields.title = "#{ fields.nick } is  posting '#{ fields.caption }' to #{ fields.channel }@#{ fields.network } #{ fields.url }"
+    fields.title = "#{ fields.nick } is posting '#{ fields.caption }' to #{ fields.channel }@#{ fields.network }"
 
     console.log fields.title
 
