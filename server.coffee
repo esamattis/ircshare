@@ -1,5 +1,6 @@
 fs = require "fs"
 path = require "path"
+qs = require "querystring"
 
 express = require "express"
 kue = require "kue"
@@ -32,12 +33,12 @@ app.post "/upload", (req, res) ->
   req.form.complete (err, fields, files) ->
     if err then throw err
 
-    console.log "got files"
 
-    fields.title = "#{ fields.nick } posting '#{ fields.caption }' to #{ fields.channel }@#{ fields.network }"
+    fields.caption = qs.unescape fields.caption
     fields.url = "http://#{ req.headers.host }/img/#{ path.basename files.picdata.path }"
+    fields.title = "#{ fields.nick } is  posting '#{ fields.caption }' to #{ fields.channel }@#{ fields.network } #{ fields.url }"
 
-    console.log fields
+    console.log fields.title
 
     job = jobs.create "irc-#{ fields.network.toLowerCase() }", fields
     job.save()
