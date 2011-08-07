@@ -1,0 +1,24 @@
+{
+    "name" : "androidircshare"
+    , "version": "0.1.0"
+    , "author": "Esa-Matti Suuronen"
+    , "homepage": "https://github.com/epeli/androidircshare-server"
+    , "description": "Share pictures easily in IRC from Android phone"
+    , "bugs": {
+        "web": "https://github.com/epeli/androidircshare/issues"
+    }
+    , "repository":
+        { "type": "git"
+        , "url": "git://github.com/epeli/androidircshare-server.git"
+        }
+    , "bin": { "androidircshare-server": "./bin/androidircshare-server"
+        , "androidircshare-bot": "./bin/androidircshare-bot"
+    }
+    , "dependencies": {
+        "coffee-script": ""
+        , "kue": ""
+        , "irc": ""
+        , "express": ""
+        , "connect-form": ""
+    }
+}
