@@ -56,6 +56,7 @@ class IRCPoster
         done()
 
   sayAndPart: (channel, msg, cb) ->
+    msg = msg.replace "\n", " "
     if /^[#!‚]/.test channel
       @client.join channel, =>
         @client.say channel, msg
