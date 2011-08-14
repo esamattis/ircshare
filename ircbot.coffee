@@ -59,7 +59,7 @@ class IRCPoster
         done new Error("Not registered")
         return
 
-      msg =   "<#{ job.data.nick }> #{ job.data.caption } #{ job.data.url }"
+      msg =   "<#{ job.data.nick }> #{ job.data.caption } #{ job.data.url } (http://ircshare.dy.fi/)"
       console.log msg
       @sayAndPart job.data.channel, msg, ->
         console.log "done"

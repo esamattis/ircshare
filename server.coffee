@@ -9,13 +9,16 @@ form = require('connect-form')
 kue = require "kue"
 config = JSON.parse fs.readFileSync "./config.json"
 
-
-
 kue.redis.createClient = ->
   client = redis.createClient(config.redis.port, config.redis.host)
   if config.redis.pass?
     client.auth config.redis.pass
   client
+
+kueui = express.createServer()
+kueui.use(express.basicAuth(config.kueui.user, config.kueui.pass))
+kueui.use kue.app
+
 
 jobs = kue.createQueue()
 
@@ -32,6 +35,10 @@ app.get "/#{ config.uploadpath }", (req, res) ->
   res.header('Content-Type', 'text/html')
   res.end '''
   <form action="" method="post" accept-charset="utf-8"  enctype="form-data/multipart">
+  <input type="text" name="nick" value="nick" />
+  <input type="text" name="channel" value="channel" />
+  <input type="text" name="caption" value="caption" />
+  <input type="text" name="network" value="network" />
   <input type="file" name="picdata" />
   <input type="hidden" name="foo" value="bar" />
   <p><input type="submit" value="Continue &rarr;"></p>
@@ -46,7 +53,7 @@ app.post "/#{ config.uploadpath }", (req, res) ->
     for k, v of fields
       fields[k] = qs.unescape v
 
-    fields.url = "http://#{ req.headers.host }/img/#{ path.basename files.picdata.path }"
+    fields.url = "#{ config.imgurl }#{ path.basename files.picdata.path }"
     fields.title = "#{ fields.nick } is posting '#{ fields.caption }' to #{ fields.channel }@#{ fields.network }"
 
     console.log fields.title
@@ -58,4 +65,4 @@ app.post "/#{ config.uploadpath }", (req, res) ->
 
 
 app.listen 1337
-kue.app.listen(3000)
+kueui.listen(3000)
