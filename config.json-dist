@@ -1,0 +1,11 @@
+{
+  "redis": {
+      "host": "example.com"
+    , "port": 1234
+    , "pass": "foobared"
+  }
+  , "irc": [
+     {"name": "freenode",  "host": "irc.freenode.net", "port": 6667 }
+  ]
+  , "uploadpath": "upload"
+}

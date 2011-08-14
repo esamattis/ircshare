@@ -3,12 +3,22 @@ path = require "path"
 qs = require "querystring"
 
 express = require "express"
-kue = require "kue"
+redis = require "redis"
 form = require('connect-form')
 
-# require "./ircposter"
+kue = require "kue"
+config = JSON.parse fs.readFileSync "./config.json"
+
+
+
+kue.redis.createClient = ->
+  client = redis.createClient(config.redis.port, config.redis.host)
+  if config.redis.pass?
+    client.auth config.redis.pass
+  client
 
 jobs = kue.createQueue()
+
 app = express.createServer()
 
 app.configure ->
@@ -18,7 +28,7 @@ app.configure ->
   app.use express.static __dirname + '/public'
 
 
-app.get "/photos", (req, res) ->
+app.get "/#{ config.uploadpath }", (req, res) ->
   res.header('Content-Type', 'text/html')
   res.end '''
   <form action="" method="post" accept-charset="utf-8"  enctype="form-data/multipart">
@@ -28,7 +38,7 @@ app.get "/photos", (req, res) ->
   </form>
   '''
 
-app.post "/upload", (req, res) ->
+app.post "/#{ config.uploadpath }", (req, res) ->
 
   req.form.complete (err, fields, files) ->
     if err then throw err
@@ -47,7 +57,5 @@ app.post "/upload", (req, res) ->
     res.end(fields.url)
 
 
-
 app.listen 1337
-
 kue.app.listen(3000)

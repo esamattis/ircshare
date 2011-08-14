@@ -1,6 +1,16 @@
+fs = require "fs"
 
 kue = require "kue"
+redis = require "redis"
 irc = require "irc"
+
+config = JSON.parse fs.readFileSync "./config.json"
+
+kue.redis.createClient = ->
+  client = redis.createClient(config.redis.port, config.redis.host)
+  if config.redis.pass?
+    client.auth config.redis.pass
+  client
 
 jobs = kue.createQueue()
 
@@ -74,8 +84,8 @@ setTimeout ->
 , 2000
 
 
-new IRCPoster("ircnet", "irc.jyu.fi").start()
-new IRCPoster("freenode", "irc.freenode.net").start()
+for network in config.irc
+  new IRCPoster(network.name, network.host).start()
 
 
 

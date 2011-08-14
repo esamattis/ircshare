@@ -19,6 +19,7 @@
         , "kue": ""
         , "irc": ""
         , "express": ""
+        , "redis": ""
         , "connect-form": ""
     }
 }
