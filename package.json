@@ -19,6 +19,8 @@
         , "kue": ""
         , "irc": ""
         , "express": ""
+        , "express-share": ""
+        , "jade": ""
         , "redis": ""
         , "connect-form": ""
     }

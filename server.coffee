@@ -5,6 +5,7 @@ qs = require "querystring"
 express = require "express"
 redis = require "redis"
 form = require('connect-form')
+addCodeSharingTo = require("express-share").addCodeSharingTo
 
 kue = require "kue"
 config = JSON.parse fs.readFileSync "./config.json"
@@ -30,20 +31,26 @@ app.configure ->
     uploadDir: __dirname + '/public/img'
   app.use express.static __dirname + '/public'
 
+addCodeSharingTo app
+
+app.shareFs __dirname + "/client/vendor/jquery.js"
+app.shareFs __dirname + "/client/vendor/dumbformstate.js"
+app.shareFs __dirname + "/client/main.coffee"
 
 app.get "/#{ config.uploadpath }", (req, res) ->
-  res.header('Content-Type', 'text/html')
-  res.end '''
-  <form action="" method="post" accept-charset="utf-8"  enctype="form-data/multipart">
-  <input type="text" name="nick" value="nick" />
-  <input type="text" name="channel" value="channel" />
-  <input type="text" name="caption" value="caption" />
-  <input type="text" name="network" value="network" />
-  <input type="file" name="picdata" />
-  <input type="hidden" name="foo" value="bar" />
-  <p><input type="submit" value="Continue &rarr;"></p>
-  </form>
-  '''
+  res.render "upload.jade"
+  # res.header('Content-Type', 'text/html')
+  # res.end '''
+  # <form action="" method="post" accept-charset="utf-8"  enctype="form-data/multipart">
+  # <input type="text" name="nick" value="nick" />
+  # <input type="text" name="channel" value="channel" />
+  # <input type="text" name="caption" value="caption" />
+  # <input type="text" name="network" value="network" />
+  # <input type="file" name="picdata" />
+  # <input type="hidden" name="device_id" value="" />
+  # <p><input type="submit" value="Continue &rarr;"></p>
+  # </form>
+  # '''
 
 app.post "/#{ config.uploadpath }", (req, res) ->
 
@@ -64,5 +71,5 @@ app.post "/#{ config.uploadpath }", (req, res) ->
     res.end(fields.url)
 
 
-app.listen 1337
-kueui.listen(3000)
+app.listen config.port
+kueui.listen 3000

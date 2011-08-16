@@ -33,12 +33,12 @@ retryAll = (ids) ->
 
 class IRCPoster
   constructor: (@networkName, @address) ->
-    nick = "AndroidIRCSHare"
+    nick = config.botnick
     @registered = false
 
     @client = new irc.Client @address, nick,
       userName: nick
-      realName: "http://github.com/epeli/androidircshare"
+      realName: "http://ircshare.com/"
       autoConnect: false
     @client.on "connect", =>
       console.log "Connected to #{ @networkName } (#{ @address })"
@@ -46,7 +46,12 @@ class IRCPoster
     @client.on "registered", =>
       console.log "Registered to #{ @networkName } (#{ @address })"
       @registered = true
+      jobs.failed (err, ids) ->
+        throw err if err
+        retryAll ids
 
+    @client.on "message", (from, to, msg) ->
+      console.log from, to, msg
 
     @client.on "error", (err) ->
       console.log err
@@ -59,11 +64,12 @@ class IRCPoster
         done new Error("Not registered")
         return
 
-      msg =   "<#{ job.data.nick }> #{ job.data.caption } #{ job.data.url } (http://ircshare.dy.fi/)"
+      msg =   "<#{ job.data.nick }> #{ job.data.caption } #{ job.data.url } (http://ircshare.com/)"
       console.log msg
-      @sayAndPart job.data.channel, msg, ->
-        console.log "done"
-        done()
+      @client.say job.data.nick, "Somebody is posting pic #{ job.data.url } in your name", ->
+        @sayAndPart job.data.channel, msg, ->
+          console.log "done"
+          done()
 
   sayAndPart: (channel, msg, cb) ->
     msg = msg.replace "\n", " "
@@ -77,11 +83,11 @@ class IRCPoster
 
 
 
-setTimeout ->
-  jobs.failed (err, ids) ->
-    throw err if err
-    retryAll ids
-, 2000
+# setTimeout ->
+#   jobs.failed (err, ids) ->
+#     throw err if err
+#     retryAll ids
+# , 2000
 
 
 for network in config.irc

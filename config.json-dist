@@ -1,5 +1,6 @@
 {
-  "redis": {
+  "port": 8080
+  , "redis": {
       "host": "example.com"
     , "port": 1234
     , "pass": "foobared"
@@ -8,4 +9,6 @@
      {"name": "freenode",  "host": "irc.freenode.net", "port": 6667 }
   ]
   , "uploadpath": "upload"
+  , "imgurl": "http://localhost:8080/img/"
+  , "kueui": { "user": "user" ,"pass": "user" }
 }
