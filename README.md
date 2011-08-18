@@ -1,14 +1,24 @@
 # Share in IRC server
 
+Pre-alpha stuff here!
+
 # Installation
 
-Install Redis
+Install Redis.
 
-Install kue from github:
+Run:
+    
+    npm install .
 
-    npm install https://github.com/LearnBoost/kue/tarball/master
+to install all deps.
 
-Other deps works as usually.
+Run the web server:
+
+    coffee server.coffee
+
+Run the irc bot:
+
+    coffee ircbot.coffee
 
 
-Client https://github.com/epeli/androidircshare
+Client https://github.com/epeli/ircshare-android
