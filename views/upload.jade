@@ -7,12 +7,12 @@
       :markdown
           Hello fellow [IRC
           user](http://en.wikipedia.org/wiki/Internet_Relay_Chat)!  Today it is
-          dead simple to share you pics in Social Networks and in comparison it
-          is bit too much of a work to do it for only IRC.
+          dead simple to share your pics on Social Networks and in comparison
+          it is bit too much of a work to do it for only IRC.
 
           This is an [open](https://github.com/epeli/ircshare)
           [source](https://github.com/epeli/ircshare-android) and non-profit
-          attempt to fix that. IRCShare.com is web service and [Android app](#android) that
+          attempt to fix that. IRCShare is web service and [Android app](#android) that
           makes it dead simple to share your images on IRC.
 
           You can report issues to [Github](https://github.com/epeli/ircshare/issues).
@@ -51,6 +51,7 @@
           .clearfix
             label(for="picdata") Picture to send
             input.input-file(type="file", name="picdata", id="picdata")
+            .description You can also just drag and drop a file here!
           .clearfix
             input(type="hidden", name="deviceid", value="")
             input(type="hidden", name="devicename", value="")
@@ -66,3 +67,4 @@
     h1#android Android Application
     :markdown
       Coming soon! [Sources](https://github.com/epeli/ircshare-android)
+
