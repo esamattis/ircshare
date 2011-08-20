@@ -3,6 +3,10 @@ fs = require "fs"
 kue = require "kue"
 redis = require "redis"
 irc = require "irc"
+_  = require 'underscore' 
+_.mixin require 'underscore.string' 
+
+urlsortener = require "./urlsortener"
 
 config = JSON.parse fs.readFileSync "./config.json"
 
@@ -30,7 +34,6 @@ retryAll = (ids) ->
   retry id, (err) ->
     throw err if err
     retryAll ids
-
 
 class IRCPoster
   constructor: (@networkName, @address) ->
@@ -60,12 +63,17 @@ class IRCPoster
       console.log from, msg, to
 
     @client.on "pm", (from, msg) =>
+      msg = _.clean msg
       [cmd, deviceid] = msg.split(" ")
-      return unless cmd is "register"
       userid = @userId from, deviceid
-
-      db.set userid, true, =>
-        @retryJobs()
+      if cmd is "ok"
+        db.set userid, "ok", (err) =>
+          throw err if err
+          @client.say from, "Thanks! I won't ask about this again on this network and with that device."
+          @retryJobs()
+      if cmd is "no"
+        db.set userid, "no", =>
+          @client.say from, "Roger. I won't bother you again about this device and network."
 
     @client.on "error", (err) ->
       console.log "IRC ERRIR", err
@@ -79,28 +87,27 @@ class IRCPoster
     "reg:#{ nick }@#{ @networkName }:#{ deviceid }"
 
   askToRegister: (nick, data) ->
-    msg = "
- Somebody is trying to post a picture from #{ data.devicename } with caption
- \" #{ data.caption }\" to
- #{ data.channel } in your nickname. This nickname is not registered with that
- device on ircshare.com. If this is you: type \"register #{ data.deviceid }\"
- without quotes to register it. This will be asked only once per device, nick
- and irc network. Otherwise just ignore this."
-    @client.say nick, msg
+    @client.say nick, "Somebody is trying to post a picture from 
+ #{ data.devicename } with caption \" #{ data.caption }\" to #{ data.channel } in your nickname."
+    @client.say nick,  "This nickname is not registered with that device on IRCShare.com."
+    @client.say nick, "If this is you, respond to me with: \"ok #{ data.deviceid }\" without the quotes."
+    @client.say nick, "If this is not you, respond with: \"no #{ data.deviceid }\"."
 
   startJobProcessor: ->
     jobs.process "irc-#{ @networkName }", (job, done) =>
 
-      msg =   "<#{ job.data.nick }> #{ job.data.caption } #{ job.data.url }"
+      msg =   "<#{ job.data.nick }> #{ job.data.caption } #{ config.domain }#{ urlsortener.encode job.id }"
       userid = @userId(job.data.nick, job.data.deviceid)
 
       db.get userid, (err, registered) =>
         console.log "process", err, registered
-        return done err if err
-        if registered
+        if registered is "ok"
           @sayAndPart job.data.channel, msg, ->
             console.log "done", msg
             done()
+        else if registered is "no"
+          done()
+          return
         else
           done new Error "#{ userid  } is not registered yet. Device #{ job.data.devicename }"
           @askToRegister job.data.nick, job.data

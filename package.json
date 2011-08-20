@@ -23,5 +23,7 @@
         , "jade": ""
         , "redis": ""
         , "connect-form": ""
+        , "underscore": ""
+        , "underscore.string": ""
     }
 }
