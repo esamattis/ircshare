@@ -13,6 +13,7 @@ kue.redis.createClient = ->
   client
 
 jobs = kue.createQueue()
+db = jobs.client
 
 retry = (id, cb) ->
   kue.Job.get id, (err, job) ->
@@ -33,6 +34,7 @@ retryAll = (ids) ->
 
 class IRCPoster
   constructor: (@networkName, @address) ->
+    @networkName = @networkName.toLowerCase()
     nick = config.botnick
     @registered = false
 
@@ -46,30 +48,66 @@ class IRCPoster
     @client.on "registered", =>
       console.log "Registered to #{ @networkName } (#{ @address })"
       @registered = true
-      jobs.failed (err, ids) ->
-        throw err if err
-        retryAll ids
+      @startJobProcessor()
+      chan = "#ircshare.com"
+      @client.join chan, =>
+        console.log "joined #{ chan }"
+        @client.say chan, "Epeli: IRCShare.com is online on #{ @networkName }"
+        @retryJobs()
 
-    @client.on "message", (from, to, msg) ->
-      console.log from, to, msg
+
+    @client.on "message", (from, to, msg) =>
+      console.log from, msg, to
+
+    @client.on "pm", (from, msg) =>
+      [cmd, deviceid] = msg.split(" ")
+      return unless cmd is "register"
+      userid = @userId from, deviceid
+
+      db.set userid, true, =>
+        @retryJobs()
 
     @client.on "error", (err) ->
-      console.log err
+      console.log "IRC ERRIR", err
+
+  retryJobs: ->
+    jobs.failed (err, ids) ->
+      throw err if err
+      retryAll ids
+
+  userId: (nick, deviceid) ->
+    "reg:#{ nick }@#{ @networkName }:#{ deviceid }"
+
+  askToRegister: (nick, data) ->
+    msg = "
+ Somebody is trying to post a picture from #{ data.devicename } with caption
+ \" #{ data.caption }\" to
+ #{ data.channel } in your nickname. This nickname is not registered with that
+ device on ircshare.com. If this is you: type \"register #{ data.deviceid }\"
+ without quotes to register it. This will be asked only once per device, nick
+ and irc network. Otherwise just ignore this."
+    @client.say nick, msg
+
+  startJobProcessor: ->
+    jobs.process "irc-#{ @networkName }", (job, done) =>
+
+      msg =   "<#{ job.data.nick }> #{ job.data.caption } #{ job.data.url }"
+      userid = @userId(job.data.nick, job.data.deviceid)
+
+      db.get userid, (err, registered) =>
+        console.log "process", err, registered
+        return done err if err
+        if registered
+          @sayAndPart job.data.channel, msg, ->
+            console.log "done", msg
+            done()
+        else
+          done new Error "#{ userid  } is not registered yet. Device #{ job.data.devicename }"
+          @askToRegister job.data.nick, job.data
 
 
   start: ->
     @client.connect()
-    jobs.process "irc-#{ @networkName.toLowerCase() }", (job, done) =>
-      if not @registered
-        done new Error("Not registered")
-        return
-
-      msg =   "<#{ job.data.nick }> #{ job.data.caption } #{ job.data.url } (http://ircshare.com/)"
-      console.log msg
-      @client.say job.data.nick, "Somebody is posting pic #{ job.data.url } in your name", ->
-        @sayAndPart job.data.channel, msg, ->
-          console.log "done"
-          done()
 
   sayAndPart: (channel, msg, cb) ->
     msg = msg.replace "\n", " "
