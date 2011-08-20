@@ -21,8 +21,11 @@
         , "express": ""
         , "express-share": ""
         , "jade": ""
+        , "markdown-js": ""
         , "redis": ""
         , "connect-form": ""
+        , "stylus": ""
+        , "nib": ""
         , "underscore": ""
         , "underscore.string": ""
     }

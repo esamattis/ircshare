@@ -1,13 +1,68 @@
 
-h2 Upload
+.container
 
-form(method="post", accept-charset="utf-8",  enctype="form-data/multipart")
-  input(type="text", name="nick", value="nick")
-  input(type="text", name="channel", value="channel")
-  input(type="text", name="caption", value="caption")
-  input(type="text", name="network", value="network")
-  input(type="file", name="picdata")
-  input(type="hidden", name="deviceid", value="")
-  input(type="hidden", name="devicename", value="")
-  input(type="submit", value="Continue &rarr;")
+  .row
+    .span5.columns
+      h2 About
+      :markdown
+          Hello fellow [IRC
+          user](http://en.wikipedia.org/wiki/Internet_Relay_Chat)!  Today it is
+          dead simple to share you pics in Social Networks and in comparison it
+          is bit too much of a work to do it for only IRC.
 
+          This is an [open](https://github.com/epeli/ircshare)
+          [source](https://github.com/epeli/ircshare-android) and non-profit
+          attempt to fix that. IRCShare.com is web service and [Android app](#android) that
+          makes it dead simple to share your images on IRC.
+
+          You can report issues to [Github](https://github.com/epeli/ircshare/issues).
+
+      h2 Disclaimer
+      :markdown
+        1. Images shared via this service may disappear at any time. This is
+        created just for fun.
+        2. Any image you are going to share via this service you should be
+        prepared to share it with whole world.
+        3. Image copyrights will stay with the orignal owners.
+        4. No offensive or illegal stuff. You'll be ip-banned for doing that.
+        5. Use it for good not evil.
+
+    .span5.columns
+
+      h2 Share an image!
+      form(method="post", accept-charset="utf-8",  enctype="form-data/multipart")
+        fieldset
+          .clearfix
+            label(for="nick") Your IRC nickname
+            input(type="text", name="nick", value="", id="nick")
+            .description Must match your nickname on irc. <br /> You will be asked for confirmation
+          .clearfix
+            label(for="channel") Destination
+            input(type="text", name="channel", value="#", id="channel")
+            .description Channel or nickname
+          .clearfix
+            label(for="network") Target network
+            select(name="network", id="network")
+              option IRCnet
+              option Freenode
+          .clearfix
+            label(for="caption") Image caption
+            textarea(rows=3, name="caption", value="", id="caption")
+          .clearfix
+            label(for="picdata") Picture to send
+            input.input-file(type="file", name="picdata", id="picdata")
+          .clearfix
+            input(type="hidden", name="deviceid", value="")
+            input(type="hidden", name="devicename", value="")
+            input.btn.large.primary(type="submit", value="Send to IRC!")
+
+    .span5.columns
+      h2 Preview
+      #preview
+        img(src="http://placekitten.com/300/300", alt="your pic")
+        .caption dsfsda sadf sadf sadf
+
+  .page-header
+    h1#android Android Application
+    :markdown
+      Coming soon! [Sources](https://github.com/epeli/ircshare-android)

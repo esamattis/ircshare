@@ -5,6 +5,12 @@ qs = require "querystring"
 express = require "express"
 redis = require "redis"
 form = require('connect-form')
+stylus = require "stylus"
+nib = require "nib"
+
+_  = require 'underscore' 
+_.mixin require 'underscore.string' 
+
 addCodeSharingTo = require("express-share").addCodeSharingTo
 
 urlsortener = require "./urlsortener"
@@ -35,9 +41,19 @@ app.configure ->
     uploadDir: __dirname + '/public/img'
   app.use express.static __dirname + '/public'
 
-addCodeSharingTo app
+  app.use stylus.middleware
+    force: true
+    src: __dirname + "/public"
+    compile: (str, path) ->
+      console.log path
+      stylus(str).set("filename", path).use(nib())
+
+  addCodeSharingTo app
+
 
 app.shareFs __dirname + "/client/vendor/jquery.js"
+app.shareFs __dirname + "/client/vendor/underscore.js"
+app.shareFs __dirname + "/client/vendor/backbone.js"
 app.shareFs __dirname + "/client/vendor/dumbformstate.js"
 app.shareFs __dirname + "/client/main.coffee"
 
@@ -46,9 +62,14 @@ app.get "/#{ config.uploadpath }", (req, res) ->
 
 app.get new RegExp("^/([#{ urlsortener.alphabet }]+$)"), (req, res) ->
   url = req.params[0]
-  jobs.client.incr "hello"
-  jobs.client.get "hello", (err, data) ->
-    res.end "Hello #{ urlsortener.decode url } #{ data }"
+  jobid = urlsortener.decode url
+
+  kue.Job.get jobid, (err, job) ->
+    throw err if err
+    res.render "image.jade", _.extend({}, job.data, config)
+
+
+
 
 app.post "/#{ config.uploadpath }", (req, res) ->
 
@@ -58,7 +79,7 @@ app.post "/#{ config.uploadpath }", (req, res) ->
     for k, v of fields
       fields[k] = qs.unescape v
 
-    fields.url = "#{ config.imgurl }#{ path.basename files.picdata.path }"
+    fields.img = path.basename files.picdata.path
     fields.title = "#{ fields.nick } is posting '#{ fields.caption }' to #{ fields.channel }@#{ fields.network }"
 
     console.log fields.title, "ID", fields.deviceid

@@ -5,6 +5,15 @@ guidGenerator = ->
 
   (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4())
 
+
+if window.FileReader
+  showImage = (file) ->
+
+else
+  showImage = ->
+
+
+
 jQuery ($) ->
   if not window.localStorage.deviceId
     window.localStorage.deviceId = guidGenerator()
