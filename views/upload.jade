@@ -35,7 +35,7 @@
           .clearfix
             label(for="nick") Your IRC nickname
             input(type="text", name="nick", value="", id="nick")
-            .description Must match your nickname on irc. <br /> You will be asked for confirmation
+            .description Must match your nickname on IRC. <br /> You will be asked for confirmation
           .clearfix
             label(for="channel") Destination
             input(type="text", name="channel", value="#", id="channel")
@@ -50,18 +50,21 @@
             textarea(rows=3, name="caption", value="", id="caption")
           .clearfix
             label(for="picdata") Picture to send
-            input.input-file(type="file", name="picdata", id="picdata")
-            .description You can also just drag and drop a file here!
+            .fileinputs
+              input.input-file.file(type="file", name="picdata", id="picdata")
+              .fakefile
+                button.btn#fileinputcover Select a file
+                .description You can also just drag and drop a file here!
           .clearfix
             input(type="hidden", name="deviceid", value="")
             input(type="hidden", name="devicename", value="")
-            input.btn.large.primary(type="submit", value="Send to IRC!")
+            input.btn.large.primary#upload(type="submit", value="Send to IRC!")
 
     .span5.columns
       h2 Preview
       #preview
-        img(src="http://placekitten.com/300/300", alt="your pic")
-        .caption dsfsda sadf sadf sadf
+        #imgpreview
+        #imgcaption dsfsda sadf sadf sadf
 
   .page-header
     h1#android Android Application

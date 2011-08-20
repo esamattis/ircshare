@@ -15,3 +15,23 @@ label {
 #LikePluginPagelet {
   display: inline;
 }
+form label {
+  text-align: left;
+}
+.fileinputs {
+  position: relative;
+}
+.fakefile {
+  position: absolute;
+  top: 25px;
+  left: 0px;
+  z-index: 1;
+}
+.file {
+  position: relative;
+  opacity: 0;
+  z-index: 2;
+}
+#upload {
+  margin-top: 1em;
+}
