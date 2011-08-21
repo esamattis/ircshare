@@ -56,8 +56,7 @@ class IRCPoster
       chan = "#ircshare.com"
       @client.join chan, =>
         console.log "joined #{ chan }"
-        for i in [1..20]
-          @client.say chan, "#{ i }. IRCShare.com is online on #{ @networkName }"
+        @client.say chan, "IRCShare.com is online on #{ @networkName }"
         @retryJobs()
 
 
@@ -109,12 +108,18 @@ class IRCPoster
           @sayAndPart job.data.channel, msg, ->
             console.log "done", msg
             done()
+            job.data.status = "ok"
+            job.save()
         else if registered is "no"
           done()
+          job.data.status = "#{ job.data.nick } refused."
+          job.save()
           return
         else
           done new Error "#{ userid  } is not registered yet. Device #{ job.data.devicename }"
           @askToRegister job.data.nick, job.data
+          job.data.status = "asking for confirmation"
+          job.save()
 
 
   start: ->

@@ -3,6 +3,7 @@ path = require "path"
 qs = require "querystring"
 
 express = require "express"
+cluster = require "cluster"
 redis = require "redis"
 form = require('connect-form')
 stylus = require "stylus"
@@ -68,10 +69,15 @@ app.get new RegExp("^/([#{ urlsortener.alphabet }]+$)"), (req, res) ->
 
   kue.Job.get jobid, (err, job) ->
     throw err if err
-    if job
-      res.render "image.jade", _.extend({}, job.data, config)
-    else
+    if not job
       res.render "404.jade", status: 404, message: "No such image"
+      return
+
+    noext = job.data.img.split(".")[0]
+    data =
+      imgSmalUrl: "#{ config.domain }img/#{ noext }.small.png"
+      imgUrl: "#{ config.domain }img/#{ job.data.img }"
+    res.render "image.jade", _.extend(data, job.data, config)
 
 
 
@@ -83,6 +89,8 @@ app.post "/#{ config.uploadpath }", (req, res) ->
 
     for k, v of fields
       fields[k] = qs.unescape v
+
+    fields.status = "starting"
 
 
     if not files?.picdata?.path
@@ -106,13 +114,39 @@ app.post "/#{ config.uploadpath }", (req, res) ->
     fields.img = path.basename files.picdata.path
     fields.title = "#{ fields.nick } is posting '#{ fields.caption }' to #{ fields.channel }@#{ fields.network }"
 
-    job = jobs.create "irc-#{ fields.network.toLowerCase() }", fields
-    console.log "jobid", job.id
-    job.save ->
-      console.log "url", config.domain + urlsortener.encode job.id
+    resizeJob = jobs.create "resizeimg", fields
+    resizeJob.save ->
+      console.log "url", config.domain + urlsortener.encode resizeJob.id
       res.end JSON.stringify
-        url: config.domain + urlsortener.encode job.id
+        url: config.domain + urlsortener.encode resizeJob.id
 
 
-app.listen config.port
-kueui.listen 3000
+resizeCluster = cluster()
+  .set("workers", 1)
+  .use(cluster.debug())
+  .start()
+if resizeCluster.isMaster
+  app.listen config.port
+  kueui.listen 3000
+  console.log "master", process.pid
+else
+  {resize} = require "./resize"
+  console.log resize
+  jobs.process "resizeimg", (job, done) ->
+    console.log "resizeing", job.data.img
+    input = __dirname + "/public/img/#{ job.data.img }"
+    noext = job.data.img.split(".")[0]
+    output = __dirname + "/public/img/#{ noext }.small.png"
+
+    resize input, output, 640, (err) ->
+      if err
+        done err
+      else
+        ircJob = jobs.create "irc-#{ job.data.network.toLowerCase() }", job.data
+        ircJob.save (err) ->
+          if err
+            done err
+          else
+            done()
+
+

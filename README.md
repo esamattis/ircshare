@@ -6,8 +6,12 @@ Pre-alpha stuff here!
 
 Install Redis.
 
+Install libjpeg headers
+
+    sudo apt-get install libjpeg8-dev
+
 Run:
-    
+
     npm install .
 
 to install all deps.
