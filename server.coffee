@@ -66,18 +66,37 @@ app.get new RegExp("^/([#{ urlsortener.alphabet }]+$)"), (req, res) ->
 
   kue.Job.get jobid, (err, job) ->
     throw err if err
-    res.render "image.jade", _.extend({}, job.data, config)
+    if job
+      res.render "image.jade", _.extend({}, job.data, config)
+    else
+      res.render "404.jade", status: 404, message: "No such image"
 
 
+# app.get "/err", (req, res) ->
+#   res.contentType('json')
+#   res.end
+#     error: 1
+#     message: "Image is missing"
 
 
 app.post "/#{ config.uploadpath }", (req, res) ->
-
   req.form.complete (err, fields, files) ->
     if err then throw err
+    res.contentType('json')
 
     for k, v of fields
       fields[k] = qs.unescape v
+
+    if not files?.picdata?.path
+      res.end
+        error: 1
+        message: "Image is missing"
+      return
+    if not fields.deviceid
+      res.end
+        error: 1
+        message: "Device id is missing"
+      return
 
     fields.img = path.basename files.picdata.path
     fields.title = "#{ fields.nick } is posting '#{ fields.caption }' to #{ fields.channel }@#{ fields.network }"
@@ -88,7 +107,8 @@ app.post "/#{ config.uploadpath }", (req, res) ->
     job = jobs.create "irc-#{ fields.network.toLowerCase() }", fields
     job.save()
 
-    res.end(fields.url)
+    res.end
+      url: fields.url
 
 
 app.listen config.port

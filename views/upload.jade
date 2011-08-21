@@ -1,4 +1,5 @@
 
+
 .container
 
   .row
@@ -54,11 +55,11 @@
               input.input-file.file(type="file", name="picdata", id="picdata")
               .fakefile
                 button.btn#fileinputcover Select a file
-                .description You can also just drag and drop a file here!
+                .description Or just drag one from your desktop
           .clearfix
             input(type="hidden", name="deviceid", value="")
             input(type="hidden", name="devicename", value="")
-            input.btn.large.primary#upload(type="submit", value="Send to IRC!")
+            input.btn.large.primary#upload(type="submit", value="Send to IRC!", disabled)
 
     .span5.columns
       h2 Preview
@@ -71,3 +72,10 @@
     :markdown
       Coming soon! [Sources](https://github.com/epeli/ircshare-android)
 
+    .container
+      .modal-footer
+        h2 Author
+        :markdown
+          [Esa-Matti Suuronen](http://esa-matti.suuronen.org/) &lt;<esa-matti@suuronen.org>&gt;
+
+          Epeli @ IRCnet/Freenode
