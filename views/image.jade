@@ -6,6 +6,7 @@
       a(href="#{ share.getImgUrl() }")
         img(src="#{ share.getSmallImgUrl() }", alt="")
 
-      p by #{ share.data.nick } @ #{ share.data.network }
-      p Page views: #{ share.data.views }
-      p Status: #{ share.data.status }
+      p
+        span by #{ share.data.nick } @ #{ share.data.network }
+        span , views: #{ share.data.views }
+        span , status: #{ share.data.status }

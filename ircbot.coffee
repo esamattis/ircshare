@@ -92,7 +92,7 @@ class IRCPoster
     @client.say nick, "Hi!"
     @client.say nick, "Somebody is trying to post a picture from
  #{ data.devicename } (#{ share.getUrl() }) to #{ data.channel } as you."
-    @client.say nick, "This nickname is not registered with that device on IRCShare.com."
+    @client.say nick, "This nickname is not registered with that device on IRCShare"
     @client.say nick, "If this is you, respond to me with: \"ok #{ data.deviceid }\" without the quotes."
     @client.say nick, "If this is not you, respond with: \"no #{ data.deviceid }\"."
 
@@ -108,14 +108,13 @@ class IRCPoster
 
         db.get userid, (err, registered) =>
           if registered is "ok"
-            console.log "SAYING", share.data.channel
             @sayAndPart share.data.channel, msg, ->
               console.log "done", msg
               done()
-              share.set status: "ok"
+              share.set status: "posted"
           else if registered is "no"
             done()
-            share.set status: "#{ share.data.nick } refused."
+            share.set status: "owner refused posting"
             return
           else
             done new Error "#{ userid  } is not registered yet. Device #{ share.data.devicename }"

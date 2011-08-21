@@ -1,4 +1,7 @@
 $ = jQuery
+if not window.console?.log?
+  window.console =
+    log: ->
 
 guidGenerator = ->
   S4 = ->
