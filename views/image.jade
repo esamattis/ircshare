@@ -1,7 +1,9 @@
-h1= caption
-p= domain
-p= img
-a(href="#{ imgUrl }")
-  img(src="#{ imgSmalUrl }", alt="")
+.container
 
-p= status
+  .row
+    .span16.columns
+      h1= caption
+      a(href="#{ imgUrl }")
+        img(src="#{ imgSmalUrl }", alt="")
+
+      p by #{ nick } @ #{ network }

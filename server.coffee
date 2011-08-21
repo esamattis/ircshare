@@ -46,7 +46,6 @@ app.configure ->
     force: true
     src: __dirname + "/public"
     compile: (str, path) ->
-      console.log path
       stylus(str).set("filename", path).use(nib())
 
   addCodeSharingTo app
@@ -57,6 +56,7 @@ app.shareFs __dirname + "/client/vendor/jquery.validate.js"
 app.shareFs __dirname + "/client/vendor/underscore.js"
 app.shareFs __dirname + "/client/vendor/backbone.js"
 app.shareFs __dirname + "/client/vendor/dumbformstate.js"
+app.shareFs __dirname + "/client/jquery.edited.coffee"
 app.shareFs __dirname + "/client/main.coffee"
 
 app.get "/#{ config.uploadpath }", (req, res) ->
@@ -116,24 +116,24 @@ app.post "/#{ config.uploadpath }", (req, res) ->
 
     resizeJob = jobs.create "resizeimg", fields
     resizeJob.save ->
-      console.log "url", config.domain + urlsortener.encode resizeJob.id
       res.end JSON.stringify
         url: config.domain + urlsortener.encode resizeJob.id
+
 
 
 resizeCluster = cluster()
   .set("workers", 1)
   .use(cluster.debug())
   .start()
+
+
+
 if resizeCluster.isMaster
   app.listen config.port
   kueui.listen 3000
-  console.log "master", process.pid
 else
   {resize} = require "./resize"
-  console.log resize
   jobs.process "resizeimg", (job, done) ->
-    console.log "resizeing", job.data.img
     input = __dirname + "/public/img/#{ job.data.img }"
     noext = job.data.img.split(".")[0]
     output = __dirname + "/public/img/#{ noext }.small.png"

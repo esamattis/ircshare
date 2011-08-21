@@ -71,7 +71,10 @@ class Preview
     showImage: ->
 
   setCaption: (str) ->
-    @imgCaption.text str
+    if not $.trim str
+      @imgCaption.html "&nbsp;"
+    else
+      @imgCaption.text str
 
 
 hasModernUpload = window.XMLHttpRequest and window.FormData
@@ -190,7 +193,7 @@ $ ->
   setCaption = ->
     preview.setCaption captionTextArea.val()
   setCaption()
-  captionTextArea.keydown setCaption
+  captionTextArea.edited setCaption
 
 
   $(document).bind "dragenter", (e) ->

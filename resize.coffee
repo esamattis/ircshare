@@ -10,7 +10,6 @@ exports.resize = (inputPath, outputPath, maxWidth, cb) ->
     cb? err
 
   img.onload = ->
-    console.log "LOAD"
     if img.width < maxWidth and img.height < maxWidth
       height = img.height
       width = img.width
@@ -28,10 +27,8 @@ exports.resize = (inputPath, outputPath, maxWidth, cb) ->
     ctx.drawImage(img, 0, 0, width, height)
     canvas.toBuffer (err, buf) ->
       fs.writeFile outputPath, buf, (err) ->
-        console.log "DONE IMG!", outputPath
         cb?(err)
 
-  console.log "loading", inputPath
   img.src = inputPath
 
 if require.main is module
