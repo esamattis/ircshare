@@ -8,23 +8,19 @@ redis = require "redis"
 form = require('connect-form')
 stylus = require "stylus"
 nib = require "nib"
-
-_  = require 'underscore' 
-_.mixin require 'underscore.string' 
+kue = require "kue"
+_  = require 'underscore'
+_.mixin require 'underscore.string'
 
 addCodeSharingTo = require("express-share").addCodeSharingTo
 
 urlsortener = require "./urlsortener"
+{ShareItem} = require "./shareitem"
 
-kue = require "kue"
 config = JSON.parse fs.readFileSync "./config.json"
 
-
-kue.redis.createClient = ->
-  client = redis.createClient(config.redis.port, config.redis.host)
-  if config.redis.pass?
-    client.auth config.redis.pass
-  client
+conn = require "./redisconnection"
+kue.redis.createClient = conn.getClient
 
 kueui = express.createServer()
 kueui.use(express.basicAuth(config.kueui.user, config.kueui.pass))
@@ -60,24 +56,31 @@ app.shareFs __dirname + "/client/jquery.edited.coffee"
 app.shareFs __dirname + "/client/main.coffee"
 
 app.get "/#{ config.uploadpath }", (req, res) ->
-  res.render "upload.jade"
+  res.render "upload.jade",
+    main: {}
 
 
 app.get new RegExp("^/([#{ urlsortener.alphabet }]+$)"), (req, res) ->
   url = req.params[0]
   jobid = urlsortener.decode url
 
-  kue.Job.get jobid, (err, job) ->
-    throw err if err
-    if not job
+  share = new ShareItem id: jobid, config: config
+  share.load (err) ->
+    if err
+      console.log err
+      res.end "OMG some error"
+      return
+    if not share.data.filename
       res.render "404.jade", status: 404, message: "No such image"
       return
 
-    noext = job.data.img.split(".")[0]
-    data =
-      imgSmalUrl: "#{ config.domain }img/#{ noext }.small.png"
-      imgUrl: "#{ config.domain }img/#{ job.data.img }"
-    res.render "image.jade", _.extend(data, job.data, config)
+    console.log "res", share.data
+    res.render "image.jade",
+      share: share
+      main:
+        title: share.data.caption
+
+    share.incrViews()
 
 
 
@@ -111,13 +114,21 @@ app.post "/#{ config.uploadpath }", (req, res) ->
         message: "Network is missing"
       return
 
-    fields.img = path.basename files.picdata.path
-    fields.title = "#{ fields.nick } is posting '#{ fields.caption }' to #{ fields.channel }@#{ fields.network }"
+    fields.filename = path.basename files.picdata.path
+    console.log "filename IS", fields.filename
 
-    resizeJob = jobs.create "resizeimg", fields
-    resizeJob.save ->
-      res.end JSON.stringify
-        url: config.domain + urlsortener.encode resizeJob.id
+    share = new ShareItem config: config
+    share.load (err) ->
+      throw err if err
+      resizeJob = jobs.create "resizeimg",
+        shareId: share.id
+        title: "#{ fields.nick } is posting '#{ fields.caption }' to #{ fields.channel }@#{ fields.network }"
+      share.set fields, (err) ->
+        throw err if err
+        resizeJob.save (err) ->
+          throw err if err
+          res.end JSON.stringify
+            url: share.getUrl()
 
 
 
@@ -134,19 +145,20 @@ if resizeCluster.isMaster
 else
   {resize} = require "./resize"
   jobs.process "resizeimg", (job, done) ->
-    input = __dirname + "/public/img/#{ job.data.img }"
-    noext = job.data.img.split(".")[0]
-    output = __dirname + "/public/img/#{ noext }.small.png"
-
-    resize input, output, 640, (err) ->
-      if err
-        done err
-      else
-        ircJob = jobs.create "irc-#{ job.data.network.toLowerCase() }", job.data
-        ircJob.save (err) ->
-          if err
-            done err
-          else
-            done()
+    share = new ShareItem id: job.data.shareId, config: config
+    share.load (err) ->
+      return done err if err
+      share.set status: "resizing"
+      resize share.getFsPath(), share.getSmallFsPath(), 640, (err) ->
+        if err
+          done err
+        else
+          share.set status: "waiting to be posted to irc"
+          ircJob = jobs.create "irc-#{ share.data.network.toLowerCase() }", job.data
+          ircJob.save (err) ->
+            if err
+              done err
+            else
+              done()
 
 

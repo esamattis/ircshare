@@ -7,14 +7,13 @@ _  = require 'underscore'
 _.mixin require 'underscore.string' 
 
 urlsortener = require "./urlsortener"
+{ShareItem} = require "./shareitem"
 
 config = JSON.parse fs.readFileSync "./config.json"
 
-kue.redis.createClient = ->
-  client = redis.createClient(config.redis.port, config.redis.host)
-  if config.redis.pass?
-    client.auth config.redis.pass
-  client
+conn = require "./redisconnection"
+kue.redis.createClient = conn.getClient
+
 
 jobs = kue.createQueue()
 db = jobs.client
@@ -87,39 +86,41 @@ class IRCPoster
   userId: (nick, deviceid) ->
     "reg:#{ nick }@#{ @networkName }:#{ deviceid }"
 
-  askToRegister: (nick, data) ->
+  askToRegister: (share) ->
+    nick = share.data.nick
+    data = share.data
     @client.say nick, "Hi!"
-    @client.say nick, "Somebody is trying to post a picture from 
- #{ data.devicename } with caption \" #{ data.caption }\" to #{ data.channel } as you."
-    @client.say nick,  "This nickname is not registered with that device on IRCShare.com."
+    @client.say nick, "Somebody is trying to post a picture from
+ #{ data.devicename } (#{ share.getUrl() }) to #{ data.channel } as you."
+    @client.say nick, "This nickname is not registered with that device on IRCShare.com."
     @client.say nick, "If this is you, respond to me with: \"ok #{ data.deviceid }\" without the quotes."
     @client.say nick, "If this is not you, respond with: \"no #{ data.deviceid }\"."
 
   startJobProcessor: ->
     jobs.process "irc-#{ @networkName }", (job, done) =>
+      share = new ShareItem id: job.data.shareId, config: config
+      share.load (err) =>
+        return done err if err
 
-      msg =   "<#{ job.data.nick }> #{ job.data.caption } #{ config.domain }#{ urlsortener.encode job.id }"
-      userid = @userId(job.data.nick, job.data.deviceid)
+        msg =   "<#{ share.data.nick }> #{ share.data.caption } #{ share.getUrl()}"
+        console.log "getting user id for", share.data
+        userid = @userId(share.data.nick, share.data.deviceid)
 
-      db.get userid, (err, registered) =>
-        console.log "process", err, registered
-        if registered is "ok"
-          console.log "SAYING", job.data.channel
-          @sayAndPart job.data.channel, msg, ->
-            console.log "done", msg
+        db.get userid, (err, registered) =>
+          if registered is "ok"
+            console.log "SAYING", share.data.channel
+            @sayAndPart share.data.channel, msg, ->
+              console.log "done", msg
+              done()
+              share.set status: "ok"
+          else if registered is "no"
             done()
-            job.data.status = "ok"
-            job.save()
-        else if registered is "no"
-          done()
-          job.data.status = "#{ job.data.nick } refused."
-          job.save()
-          return
-        else
-          done new Error "#{ userid  } is not registered yet. Device #{ job.data.devicename }"
-          @askToRegister job.data.nick, job.data
-          job.data.status = "asking for confirmation"
-          job.save()
+            share.set status: "#{ share.data.nick } refused."
+            return
+          else
+            done new Error "#{ userid  } is not registered yet. Device #{ share.data.devicename }"
+            @askToRegister share
+            share.set status: "Asking for confirmation from #{ share.data.nick }"
 
 
   start: ->

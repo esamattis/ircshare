@@ -29,6 +29,7 @@ exports.resize = (inputPath, outputPath, maxWidth, cb) ->
       fs.writeFile outputPath, buf, (err) ->
         cb?(err)
 
+  console.log "resing imgae in", inputPath
   img.src = inputPath
 
 if require.main is module

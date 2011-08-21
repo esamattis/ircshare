@@ -2,8 +2,10 @@
 
   .row
     .span16.columns
-      h1= caption
-      a(href="#{ imgUrl }")
-        img(src="#{ imgSmalUrl }", alt="")
+      h1= share.data.caption
+      a(href="#{ share.getImgUrl() }")
+        img(src="#{ share.getSmallImgUrl() }", alt="")
 
-      p by #{ nick } @ #{ network }
+      p by #{ share.data.nick } @ #{ share.data.network }
+      p Page views: #{ share.data.views }
+      p Status: #{ share.data.status }

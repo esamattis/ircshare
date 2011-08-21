@@ -1,7 +1,10 @@
 !!! 5
 html(lang="en")
   head
-    title Share your images on IRC
+    - if (main.title)
+      title #{ main.title } - Share your images on IRC
+    - else
+      title Share your images on IRC
     link(rel="stylesheet", type="text/css", href="/css/bootstrap.css")
     link(rel="stylesheet", type="text/css", href="/main.css")
     link(rel="shortcut icon", href="/favicon.png", type="image/x-icon")
