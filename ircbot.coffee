@@ -45,6 +45,7 @@ class IRCPoster
       userName: nick
       realName: "http://ircshare.com/"
       autoConnect: false
+      floodProtection: true
     @client.on "connect", =>
       console.log "Connected to #{ @networkName } (#{ @address })"
 
@@ -55,7 +56,8 @@ class IRCPoster
       chan = "#ircshare.com"
       @client.join chan, =>
         console.log "joined #{ chan }"
-        @client.say chan, "Epeli: IRCShare.com is online on #{ @networkName }"
+        for i in [1..20]
+          @client.say chan, "#{ i }. IRCShare.com is online on #{ @networkName }"
         @retryJobs()
 
 
@@ -87,8 +89,9 @@ class IRCPoster
     "reg:#{ nick }@#{ @networkName }:#{ deviceid }"
 
   askToRegister: (nick, data) ->
+    @client.say nick, "Hi!"
     @client.say nick, "Somebody is trying to post a picture from 
- #{ data.devicename } with caption \" #{ data.caption }\" to #{ data.channel } in your nickname."
+ #{ data.devicename } with caption \" #{ data.caption }\" to #{ data.channel } as you."
     @client.say nick,  "This nickname is not registered with that device on IRCShare.com."
     @client.say nick, "If this is you, respond to me with: \"ok #{ data.deviceid }\" without the quotes."
     @client.say nick, "If this is not you, respond with: \"no #{ data.deviceid }\"."
@@ -102,6 +105,7 @@ class IRCPoster
       db.get userid, (err, registered) =>
         console.log "process", err, registered
         if registered is "ok"
+          console.log "SAYING", job.data.channel
           @sayAndPart job.data.channel, msg, ->
             console.log "done", msg
             done()

@@ -52,6 +52,7 @@ app.configure ->
 
 
 app.shareFs __dirname + "/client/vendor/jquery.js"
+app.shareFs __dirname + "/client/vendor/jquery.validate.js"
 app.shareFs __dirname + "/client/vendor/underscore.js"
 app.shareFs __dirname + "/client/vendor/backbone.js"
 app.shareFs __dirname + "/client/vendor/dumbformstate.js"
@@ -59,6 +60,7 @@ app.shareFs __dirname + "/client/main.coffee"
 
 app.get "/#{ config.uploadpath }", (req, res) ->
   res.render "upload.jade"
+
 
 app.get new RegExp("^/([#{ urlsortener.alphabet }]+$)"), (req, res) ->
   url = req.params[0]
@@ -72,11 +74,6 @@ app.get new RegExp("^/([#{ urlsortener.alphabet }]+$)"), (req, res) ->
       res.render "404.jade", status: 404, message: "No such image"
 
 
-# app.get "/err", (req, res) ->
-#   res.contentType('json')
-#   res.end
-#     error: 1
-#     message: "Image is missing"
 
 
 app.post "/#{ config.uploadpath }", (req, res) ->
@@ -87,28 +84,34 @@ app.post "/#{ config.uploadpath }", (req, res) ->
     for k, v of fields
       fields[k] = qs.unescape v
 
+
     if not files?.picdata?.path
-      res.end
+      res.end JSON.stringify
         error: 1
         message: "Image is missing"
       return
+
     if not fields.deviceid
-      res.end
+      res.end JSON.stringify
         error: 1
         message: "Device id is missing"
+      return
+
+    if not fields.network
+      res.end JSON.stringify
+        error: 1
+        message: "Network is missing"
       return
 
     fields.img = path.basename files.picdata.path
     fields.title = "#{ fields.nick } is posting '#{ fields.caption }' to #{ fields.channel }@#{ fields.network }"
 
-    console.log fields.title, "ID", fields.deviceid
-    console.log "NAME", fields.devicename
-
     job = jobs.create "irc-#{ fields.network.toLowerCase() }", fields
-    job.save()
-
-    res.end
-      url: fields.url
+    console.log "jobid", job.id
+    job.save ->
+      console.log "url", config.domain + urlsortener.encode job.id
+      res.end JSON.stringify
+        url: config.domain + urlsortener.encode job.id
 
 
 app.listen config.port

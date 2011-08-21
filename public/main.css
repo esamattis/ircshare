@@ -30,8 +30,66 @@ form label {
 .file {
   position: relative;
   opacity: 0;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
   z-index: 2;
 }
 #upload {
   margin-top: 1em;
+}
+#drop_info_bg {
+  display: none;
+  position: absolute;
+  background-color: #000;
+  bottom: 0px;
+  top: 0px;
+  opacity: 0.5;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  height: 100%;
+  width: 100%;
+  z-index: 100;
+}
+#drop_info {
+  display: none;
+  position: absolute;
+  text-align: center;
+  font-size: 5em;
+  margin-top: 30%;
+  color: #fff;
+  height: 100%;
+  width: 100%;
+  z-index: 1000;
+}
+.black_overlay {
+  display: none;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+z-index1001
+  -moz-opacity: 0.8;
+  opacity: 0.8;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
+}
+.white_content {
+  display: none;
+  width: 400px;
+  position: absolute;
+  top: 25%;
+  left: 25%;
+  padding: 16px;
+  border: 16px solid #000;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  background-color: #fff;
+  z-index: 1002;
+  overflow: auto;
+}
+.white_content .box_content {
+  margin: 40px;
+}
+.white_content .close {
+  float: right;
 }

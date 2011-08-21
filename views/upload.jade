@@ -34,6 +34,21 @@
       form(method="post", accept-charset="utf-8",  enctype="form-data/multipart")
         fieldset
           .clearfix
+            label(for="picdata") Picture to send
+            .fileinputs
+              input.input-file.file(type="file", name="picdata", id="picdata")
+              .fakefile
+                button.btn#fileinputcover Select a file
+                .description Or just drag one from your desktop
+          .clearfix
+            label(for="caption") Image caption
+            textarea(rows=3, name="caption", value="", id="caption")
+          .clearfix
+            label(for="network") Target network
+            select(name="network", id="network")
+              option IRCnet
+              option Freenode
+          .clearfix
             label(for="nick") Your IRC nickname
             input(type="text", name="nick", value="", id="nick")
             .description Must match your nickname on IRC. <br /> You will be asked for confirmation
@@ -41,21 +56,6 @@
             label(for="channel") Destination
             input(type="text", name="channel", value="#", id="channel")
             .description Channel or nickname
-          .clearfix
-            label(for="network") Target network
-            select(name="network", id="network")
-              option IRCnet
-              option Freenode
-          .clearfix
-            label(for="caption") Image caption
-            textarea(rows=3, name="caption", value="", id="caption")
-          .clearfix
-            label(for="picdata") Picture to send
-            .fileinputs
-              input.input-file.file(type="file", name="picdata", id="picdata")
-              .fakefile
-                button.btn#fileinputcover Select a file
-                .description Or just drag one from your desktop
           .clearfix
             input(type="hidden", name="deviceid", value="")
             input(type="hidden", name="devicename", value="")
