@@ -1,4 +1,4 @@
-# Share in IRC server
+# Share on IRC server
 
 Pre-alpha stuff here!
 
