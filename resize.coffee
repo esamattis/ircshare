@@ -4,23 +4,30 @@ Canvas = require "canvas"
 Image = Canvas.Image
 
 
+downscale = (width, height, maxWidth) ->
+  if width < maxWidth and height < maxWidth
+    height = height
+    width = width
+  else if width > height
+    scale = maxWidth / width
+    width = maxWidth
+    height = height * scale
+  else
+    scale = maxWidth / height
+    height = maxWidth
+    width = width * scale
+
+  [width, height]
+
+
 exports.resize = (inputPath, outputPath, maxWidth, cb) ->
   img = new Image
   img.onerror = (err) ->
     cb? err
 
   img.onload = ->
-    if img.width < maxWidth and img.height < maxWidth
-      height = img.height
-      width = img.width
-    else if img.width > img.height
-      scale = maxWidth / img.width
-      width = maxWidth
-      height = img.height * scale
-    else
-      scale = maxWidth / img.height
-      height = maxWidth
-      width = img.width * scale
+
+    [width, height] = downscale img.width, img.height, maxWidth
 
     canvas = new Canvas(width, height)
     ctx = canvas.getContext "2d"
