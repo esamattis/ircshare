@@ -73,7 +73,7 @@ class IRCPoster
           @retryJobs()
       else if cmd is "no"
         db.set userid, "no", =>
-          @client.say from, "Roger. I won't bother you again about this device and network."
+          @client.say from, "Roger. I won't bother you again about this device."
           winston.info "#{ from }@#{ @networkName } denied posting from #{ deviceid }"
       else
         winston.info "Got msg from #{ from }@#{ @networkName }: #{ msg }"
@@ -87,7 +87,7 @@ class IRCPoster
       retryAll ids
 
   userId: (nick, deviceid) ->
-    "reg:#{ nick.toLowerCase() }@#{ @networkName }:#{ deviceid }"
+    "reg:#{ nick.toLowerCase() }:#{ deviceid }"
 
   askToRegister: (share) ->
     nick = share.data.nick
