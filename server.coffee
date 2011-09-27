@@ -58,7 +58,6 @@ app.configure ->
   css.addFile __dirname + "/bootstrap/bootstrap-1.0.0.css"
 
   js.addFile  __dirname + "/client/vendor/jquery.js"
-  js.addFile  __dirname + "/client/vendor/jquery.validate.js"
   js.addFile  __dirname + "/client/vendor/underscore.js"
   js.addFile  __dirname + "/client/vendor/backbone.js"
   js.addFile  __dirname + "/client/vendor/dumbformstate.js"
