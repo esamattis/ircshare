@@ -55,7 +55,7 @@ app.configure ->
   css.bind app
 
   css.addFile __dirname + "/public/main.styl"
-  css.addFile __dirname + "/bootstrap/bootstrap-1.0.0.css"
+  css.addFile __dirname + "/public/bootstrap-1.0.0.css"
 
   js.addFile  __dirname + "/client/vendor/jquery.js"
   js.addFile  __dirname + "/client/vendor/underscore.js"
