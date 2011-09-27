@@ -82,13 +82,13 @@ exports.ShareItem = class ShareItem
     __dirname + "/public/img/#{ @getSmallImgPath() }"
 
   getSmallImgUrl: ->
-    "#{ @config.domain }img/#{ @getSmallImgPath()}"
+    "http://#{ @config.domain }/img/#{ @getSmallImgPath()}"
 
   getUrl: ->
-    "#{ @config.domain }i/#{ @getUrlId() }"
+    "http://#{ @config.domain }/i/#{ @getUrlId() }"
 
   getImgUrl: ->
-    "#{ @config.domain }img/#{ @data.filename }"
+    "http://#{ @config.domain }/img/#{ @data.filename }"
 
 
 
