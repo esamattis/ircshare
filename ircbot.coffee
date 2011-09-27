@@ -69,12 +69,14 @@ class IRCPoster
         db.set userid, "ok", (err) =>
           return winston.error("Failed to set userid #{ userid }", err) if err
           @client.say from, "Thanks! I won't ask about this again on this network and with that device."
-          winston.info "#{ from }@#{ @networkName } confirmed ircshare"
+          winston.info "#{ from }@#{ @networkName } confirmed #{ deviceid }"
           @retryJobs()
-      if cmd is "no"
+      else if cmd is "no"
         db.set userid, "no", =>
           @client.say from, "Roger. I won't bother you again about this device and network."
           winston.info "#{ from }@#{ @networkName } denied posting from #{ deviceid }"
+      else
+        winston.info "Got msg from #{ from }@#{ @networkName }: #{ msg }"
 
     @client.on "error", (err) ->
       winston.error "Random IRC error", err
