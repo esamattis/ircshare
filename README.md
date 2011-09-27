@@ -26,3 +26,8 @@ Run the irc bot:
 
 
 Client https://github.com/epeli/ircshare-android
+
+# License
+
+This software is licensed under the GNU General Public License. See gpl.txt for
+more information.
