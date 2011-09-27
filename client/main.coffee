@@ -176,7 +176,7 @@ $ ->
 
   upload.on "uploaded", (e, res) ->
     # res = JSON.parse e.currentTarget.response
-    lightbox.info """Our workers has been summoned for your ircing duties.
+    lightbox.info """Our slaves are now carrying your pic to the IRC-networks!
     Find your image here <a href='#{ res.url }'>#{ res.url }</a>
     """
 

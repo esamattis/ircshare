@@ -4,19 +4,19 @@
 
   .row
     .span5.columns.about
-      h2 About
+      h2 Hello fellow IRC-user!
+
       :markdown
-          Hello fellow [IRC
-          user](http://en.wikipedia.org/wiki/Internet_Relay_Chat)!  Today it is
-          dead simple to share your pics on Social Networks and in comparison
-          it is bit too much of a work to do it for only IRC.
+          As we know, IRC is still by far the best Social Media there is, but
+          before this there hasn't been any easy way to share pictures on IRC
+          especially when on mobile. This is attempt to modernize that aspect
+          of IRC.
 
-          This is an [open](https://github.com/epeli/ircshare)
-          [source](https://github.com/epeli/ircshare-android) and non-profit
-          attempt to fix that. IRCShare is web service and [Android app](#android) that
-          makes it dead simple to share your images on IRC.
+          Just drag and drop an image on this page, define target and click
+          send!
 
-          You can report issues to [Github](https://github.com/epeli/ircshare/issues).
+          Or use the [Android app!](#android)
+
 
       h2 Disclaimer
       :markdown
@@ -27,6 +27,7 @@
         3. Image copyrights will stay with the orignal owners.
         4. No offensive or illegal stuff. You'll be ip-banned for doing that.
         5. Use it for good not evil.
+
 
     .span5.columns.upload_form
 
@@ -51,7 +52,7 @@
           .clearfix
             label(for="nick") Your IRC nickname
             input(type="text", name="nick", value="", id="nick")
-            .description Must match your nickname on IRC. <br /> You will be asked for confirmation
+            .description Must match your current nickname on IRC. You will be asked for confirmation on first time.
           .clearfix
             label(for="channel") Destination
             input(type="text", name="channel", value="#", id="channel")
@@ -71,11 +72,10 @@
   h1#android Android Application
   .android_description
     :markdown
-      Best deal of course is that you can use this Android application send
-      your picture to IRC on the go!
+      The app is coming to Android Market near you soon!
 
-      App is not on the Market yet, but you can install it for now from
-      [here](/ircshare.apk).
+      Mean while you can preview the app using [this package](/IRCShare.apk)
+      or [even hack on it!](https://github.com/epeli/ircshare-android)
 
   .screenshot
     a(href="/screenshots/select.png")
@@ -88,12 +88,12 @@
 
   .android_text
 
-  :markdown
-    Coming soon! [Sources](https://github.com/epeli/ircshare-android)
 
   .container
-    h2 Author
+    h2 Contact
     :markdown
       [Esa-Matti Suuronen](http://esa-matti.suuronen.org/) &lt;<esa-matti@suuronen.org>&gt;
 
       Epeli @ IRCnet/Freenode
+
+      You can report issues to [Github](https://github.com/epeli/ircshare/issues).
