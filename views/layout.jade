@@ -8,6 +8,7 @@ html(lang="en")
     link(rel="stylesheet", type="text/css", href="/css/bootstrap.css")
     link(rel="stylesheet", type="text/css", href="/main.css")
     link(rel="shortcut icon", href="/favicon.png", type="image/x-icon")
+    !{renderStyleTags()}
     !{renderScriptTags()}
   body
     #drop_info_bg
@@ -26,6 +27,7 @@ html(lang="en")
           a(href="/")
             img.logo(src="/favicon.png")
             span IRCShare Beta
+            span.slogan - because IRC needs some love too
     #main !{body}
 
     .container

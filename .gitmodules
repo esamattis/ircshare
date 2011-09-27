@@ -1,3 +1,6 @@
 [submodule "bootstrap"]
 	path = bootstrap
 	url = git@github.com:epeli/bootstrap.git
+[submodule "node-piles"]
+	path = node-piles
+	url = git@github.com:epeli/node-piles.git

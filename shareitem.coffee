@@ -2,12 +2,19 @@
 redis = require "redis"
 _  = require 'underscore'
 _.mixin require 'underscore.string'
+winston = require "winston"
 
-urlsortener = require "./urlsortener"
+urlshortener = require "./urlshortener"
 
 conn = require "./redisconnection"
 client = conn.getClient()
 
+matcher = /\.\w+$/
+swapExtension = (file, ext) ->
+  if matcher.test file
+    file.replace matcher, ".#{ ext }"
+  else
+    file + ".#{ ext }"
 
 exports.ShareItem = class ShareItem
 
@@ -17,7 +24,7 @@ exports.ShareItem = class ShareItem
       views: 0
     @config = settings?.config
     if settings?.urlId
-      @id urlsortener.decode settings.urlId
+      @id urlshortener.decode settings.urlId
 
   getRedisKey: -> "share:#{ @id }"
 
@@ -33,14 +40,13 @@ exports.ShareItem = class ShareItem
 
   fetchData: (cb) ->
     client.hgetall @getRedisKey(), (err, data) =>
-      console.log "loading", data
       for k, v of data
         @data[k] = v
       @data.views = parseInt @data.views, 10
       cb err, @data
 
   getUrlId: ->
-    urlsortener.encode @id
+    urlshortener.encode @id
 
   incrViews: (cb) ->
     @data.views = parseInt(@data.views, 10) || 0
@@ -53,37 +59,37 @@ exports.ShareItem = class ShareItem
 
   set: (ob, cb) ->
     for k, v of ob
-      console.log "setting", k, "to", v
 
       if typeof k is "object"
-        console.log "warning object key", k
+        winston.warn  "warning object key", k
         continue
       if typeof v is "object"
-        console.log "warning object value", v
+        winston.warn  "warning object value", v
         continue
 
       @data[k] = v
 
     @save ->
-      console.log "SAVED!", ob
       cb?.apply this, arguments
 
   getFsPath: ->
     __dirname + "/public/img/#{ @data.filename }"
 
+  getSmallImgPath: ->
+    swapExtension @data.filename, "small.jpg"
+
   getSmallFsPath: ->
-    noext = @data.filename.split(".")[0]
-    __dirname + "/public/img/#{ noext }.small.png"
+    __dirname + "/public/img/#{ @getSmallImgPath() }"
+
+  getSmallImgUrl: ->
+    "#{ @config.domain }img/#{ @getSmallImgPath()}"
 
   getUrl: ->
-    @config.domain + @getUrlId()
+    "#{ @config.domain }i/#{ @getUrlId() }"
 
   getImgUrl: ->
     "#{ @config.domain }img/#{ @data.filename }"
 
-  getSmallImgUrl: ->
-    noext = @data.filename.split(".")[0]
-    "#{ @config.domain }img/#{ noext }.small.png"
 
 
 

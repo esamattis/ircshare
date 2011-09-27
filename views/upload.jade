@@ -3,7 +3,7 @@
 .container
 
   .row
-    .span5.columns
+    .span5.columns.about
       h2 About
       :markdown
           Hello fellow [IRC
@@ -28,7 +28,7 @@
         4. No offensive or illegal stuff. You'll be ip-banned for doing that.
         5. Use it for good not evil.
 
-    .span5.columns
+    .span5.columns.upload_form
 
       h2 Share an image!
       form(method="post", accept-charset="utf-8",  enctype="form-data/multipart")
@@ -46,8 +46,8 @@
           .clearfix
             label(for="network") Target network
             select(name="network", id="network")
-              option IRCnet
-              option Freenode
+              - for (var key in networks)
+                  option= networks[key].name
           .clearfix
             label(for="nick") Your IRC nickname
             input(type="text", name="nick", value="", id="nick")
@@ -61,13 +61,33 @@
             input(type="hidden", name="devicename", value="")
             input.btn.large.primary#upload(type="submit", value="Send to IRC!", disabled)
 
-    .span5.columns
+    .span5.columns.preview
       h2#imgCaption Preview
       #preview
-        h3#imgcaption dsfsda sadf sadf sadf
+        h3#imgcaption
         #imgpreview
 
+
   h1#android Android Application
+  .android_description
+    :markdown
+      Best deal of course is that you can use this Android application send
+      your picture to IRC on the go!
+
+      App is not on the Market yet, but you can install it for now from
+      [here](/ircshare.apk).
+
+  .screenshot
+    a(href="/screenshots/select.png")
+      img(src="/screenshots/select.png", alt="select")
+  .screenshot
+    a(href="/screenshots/main.png")
+      img(src="/screenshots/main.png", alt="main")
+
+  .clearfix
+
+  .android_text
+
   :markdown
     Coming soon! [Sources](https://github.com/epeli/ircshare-android)
 

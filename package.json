@@ -11,13 +11,12 @@
         { "type": "git"
         , "url": "git://github.com/epeli/androidircshare-server.git"
         }
-    , "bin": { "androidircshare-server": "./bin/androidircshare-server"
-        , "androidircshare-bot": "./bin/androidircshare-bot"
-    }
     , "dependencies": {
         "coffee-script": ""
         , "kue": ""
         , "irc": ""
+        , "winston": ""
+        , "gm": ""
         , "express": ""
         , "express-share": ""
         , "jade": ""

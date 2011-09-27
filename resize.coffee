@@ -1,7 +1,8 @@
 
 fs = require "fs"
-Canvas = require "canvas"
-Image = Canvas.Image
+path = require "path"
+
+gm = require "gm"
 
 
 downscale = (width, height, maxWidth) ->
@@ -20,27 +21,20 @@ downscale = (width, height, maxWidth) ->
   [width, height]
 
 
+
 exports.resize = (inputPath, outputPath, maxWidth, cb) ->
-  img = new Image
-  img.onerror = (err) ->
-    cb? err
 
-  img.onload = ->
+  gm(inputPath).size (err, size) ->
 
-    [width, height] = downscale img.width, img.height, maxWidth
+    return cb? err if err
 
-    canvas = new Canvas(width, height)
-    ctx = canvas.getContext "2d"
-    ctx.drawImage(img, 0, 0, width, height)
-    canvas.toBuffer (err, buf) ->
-      fs.writeFile outputPath, buf, (err) ->
-        cb?(err)
+    [width, height] = downscale size.width, size.height, maxWidth
 
-  console.log "resing imgae in", inputPath
-  img.src = inputPath
+    fs.mkdir path.dirname(outputPath), 0666, (err) ->
+      if err and err.code isnt "EEXIST"
+        return cb? err
 
-if require.main is module
-  # exports.resize "/home/epeli/projects/ircshare/server/public/img/717074ae25c8a7e0040d8ecbb5991a06.jpg", "resized.png", 100, ->
-  #   console.log "done"
-  exports.resize "/home/epeli/Pictures/ensiodvd_coveri_mini.jpg", "resized.png", 100, ->
-    console.log "done"
+      gm(inputPath).resize(width, height).write outputPath, (err) ->
+        cb? err
+
+

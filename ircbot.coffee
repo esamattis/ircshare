@@ -3,10 +3,11 @@ fs = require "fs"
 kue = require "kue"
 redis = require "redis"
 irc = require "irc"
+winston = require "winston"
 _  = require 'underscore' 
 _.mixin require 'underscore.string' 
 
-urlsortener = require "./urlsortener"
+urlshortener = require "./urlshortener"
 {ShareItem} = require "./shareitem"
 
 config = JSON.parse fs.readFileSync "./config.json"
@@ -25,13 +26,13 @@ retry = (id, cb) ->
     job.attempt ->
       job.update (err) ->
         cb err, job
-        console.log "retrying job", id, job.type
+        winston.info  "retrying job", id, job.type
 
 retryAll = (ids) ->
   id = ids.pop()
   return if not id?
   retry id, (err) ->
-    throw err if err
+    return winston.error("Failed to retry job #{ id }", err) if err
     retryAll ids
 
 class IRCPoster
@@ -46,21 +47,19 @@ class IRCPoster
       autoConnect: false
       floodProtection: true
     @client.on "connect", =>
-      console.log "Connected to #{ @networkName } (#{ @address })"
+      winston.info  "Connected to #{ @networkName } (#{ @address })"
 
     @client.on "registered", =>
-      console.log "Registered to #{ @networkName } (#{ @address })"
+      winston.info  "Registered to #{ @networkName } (#{ @address })"
       @registered = true
       @startJobProcessor()
       chan = "#ircshare.com"
       @client.join chan, =>
-        console.log "joined #{ chan }"
+        winston.info  "joined #{ chan }@#{ @networkName }"
         @client.say chan, "IRCShare.com is online on #{ @networkName }"
         @retryJobs()
 
 
-    @client.on "message", (from, to, msg) =>
-      console.log from, msg, to
 
     @client.on "pm", (from, msg) =>
       msg = _.clean msg
@@ -68,23 +67,25 @@ class IRCPoster
       userid = @userId from, deviceid
       if cmd is "ok"
         db.set userid, "ok", (err) =>
-          throw err if err
+          return winston.error("Failed to set userid #{ userid }", err) if err
           @client.say from, "Thanks! I won't ask about this again on this network and with that device."
+          winston.info "#{ from }@#{ @networkName } confirmed ircshare"
           @retryJobs()
       if cmd is "no"
         db.set userid, "no", =>
           @client.say from, "Roger. I won't bother you again about this device and network."
+          winston.info "#{ from }@#{ @networkName } denied posting from #{ deviceid }"
 
     @client.on "error", (err) ->
-      console.log "IRC ERRIR", err
+      winston.error "Random IRC error", err
 
   retryJobs: ->
     jobs.failed (err, ids) ->
-      throw err if err
+      return winston.error("Failed to retry #{ ids }", err) if err
       retryAll ids
 
   userId: (nick, deviceid) ->
-    "reg:#{ nick }@#{ @networkName }:#{ deviceid }"
+    "reg:#{ nick.toLowerCase() }@#{ @networkName }:#{ deviceid }"
 
   askToRegister: (share) ->
     nick = share.data.nick
@@ -103,23 +104,25 @@ class IRCPoster
         return done err if err
 
         msg =   "<#{ share.data.nick }> #{ share.data.caption } #{ share.getUrl()}"
-        console.log "getting user id for", share.data
         userid = @userId(share.data.nick, share.data.deviceid)
 
         db.get userid, (err, registered) =>
           if registered is "ok"
-            @sayAndPart share.data.channel, msg, ->
-              console.log "done", msg
+            @sayAndPart share.data.channel, msg, =>
               done()
               share.set status: "posted"
+              @client.say share.data.nick, "Just posted #{ share.getUrl() } to #{ share.data.channel }"
+              winston.info "#{ share.data.nick } posted #{ share.getUrl() } to #{ share.data.channel } @ #{ @networkName }"
           else if registered is "no"
             done()
             share.set status: "owner refused posting"
+            winston.info "#{ share.data.nick }@#{ @networkName } has refused posting from #{ share.data.deviceid }"
             return
           else
             done new Error "#{ userid  } is not registered yet. Device #{ share.data.devicename }"
-            @askToRegister share
+            winston.info "Asking confirmation from #{ share.data.nick }@#{ @networkName }"
             share.set status: "Asking for confirmation from #{ share.data.nick }"
+            @askToRegister share
 
 
   start: ->

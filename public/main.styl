@@ -7,6 +7,17 @@ label
   margin-right 1em
   margin-top 1em
 
+
+@media all and (max-width: 700px)
+  .preview
+    clear both
+  .container
+    margin-left 2em !important
+
+@media all and (max-width: 510px)
+  .upload_form
+    clear both
+
 #preview
   margin 1em
   img
@@ -15,11 +26,30 @@ label
 #fb-root, #LikePluginPagelet
   display inline
 
-form
-  label
-    text-align left
+form label
+  text-align left !important
+  margin-bottom 5px
+
+.description
+  margin-top 5px
+
+.slogan
+  font-size 60%
+  margin-left 5px
+  vertical-align middle
+
+.screenshot
+  float left
+  img
+    margin 1em
+    width 200px
 
 
+twoColums = 510px
+
+@media all and (max-width: twoColums)
+  .screenshot
+    clear both
 
 .fileinputs
   position relative
