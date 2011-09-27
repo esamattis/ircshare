@@ -29,5 +29,5 @@ Client https://github.com/epeli/ircshare-android
 
 # License
 
-This software is licensed under the GNU General Public License. See gpl.txt for
-more information.
+This software is licensed under the GNU Affero General Public License. See
+agpl.txt for more information.
