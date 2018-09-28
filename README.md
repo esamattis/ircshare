@@ -1,5 +1,7 @@
 # Share on IRC server
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/epeli/ircshare.svg)](https://greenkeeper.io/)
+
 Pre-alpha stuff here!
 
 # Installation
